@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HeartDiseaseAPI.Dtos;
 using HeartDiseaseAPI.Models;
-using static HeartDiseaseAPI.Dtos.PatientDtos;
 
 namespace HeartDiseaseAPI.Mapping
 {
@@ -9,8 +8,8 @@ namespace HeartDiseaseAPI.Mapping
     {
         public AutoMapperProfile()
         {
-            CreateMap<Patient, PatientReadDto>();
-            CreateMap<PatientCreateDto, Patient>();
+            CreateMap<Patient, PatientReadDtos>();
+            CreateMap<PatientCreateDtos, Patient>();
         }
     }
 }
