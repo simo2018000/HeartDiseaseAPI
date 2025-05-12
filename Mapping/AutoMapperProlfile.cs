@@ -8,7 +8,7 @@ namespace HeartDiseaseAPI.Mapping
     {
         public AutoMapperProfile()
         {
-            CreateMap<Patient, PatientReadDto>();
+            CreateMap<HeartDiseaseAPI.Models, HeartDiseaseAPI.Models>();
             CreateMap<PatientCreateDto, Patient>();
         }
     }
