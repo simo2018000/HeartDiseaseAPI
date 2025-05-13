@@ -12,6 +12,7 @@ namespace HeartDiseaseAPI.Models
         public float BloodPressureLow { get; set; } // in mmHg
         public float BloodPressureHigh { get; set; } // in mmHg
         public float Cholesterol { get; set; } // in mg/dL
+        public float Glucose { get; set; } // in mg/dL
         public bool IsSmoker { get; set; }
         public bool IsAlcoholic { get; set; }
         public bool IsActive { get; set; }

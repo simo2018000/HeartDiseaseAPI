@@ -1,8 +1,11 @@
+using HeartDiseaseAPI.Mapping;
 using HeartDiseaseAPI.Models;
 using HeartDiseaseAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<PatientServices>();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
 
 var app = builder.Build();
 
@@ -35,6 +38,7 @@ app.MapDelete("/patients/{id}", (int id, PatientServices service) =>
 {
     var result = service.Delete(id);
     return result ? Results.NoContent() : Results.NotFound();
+
 });
 
 app.Run();

@@ -1,1 +1,10 @@
+@HeartDiseaseAPI_HostAddress = https://localhost:7225
 GET http://localhost:5131 
+POST {{HeartDiseaseAPI_HostAddress}}/patients
+Content-Type: application/json
+
+{
+  //Patient
+}
+
+###

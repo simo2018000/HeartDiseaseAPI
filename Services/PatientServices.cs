@@ -32,6 +32,7 @@ namespace HeartDiseaseAPI.Services
             patient.BloodPressureLow = updatedPatient.BloodPressureLow;
             patient.BloodPressureHigh = updatedPatient.BloodPressureHigh;
             patient.Cholesterol = updatedPatient.Cholesterol;
+            patient.Glucose = updatedPatient.Glucose;
 
             return true;
         }

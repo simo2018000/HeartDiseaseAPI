@@ -11,5 +11,13 @@ namespace HeartDiseaseAPI.Mapping
             CreateMap<Patient, PatientReadDtos>();
             CreateMap<PatientCreateDtos, Patient>();
         }
+        private int NormalizeSex(String Sex){
+            //input flexible exemple {"m","f","H","M","h","m"}
+
+            Sex = Sex.Trim().ToUpper();
+            return Sex == "H" || Sex == "M" ? 1 : 0;
+
+
+        }
     }
 }
