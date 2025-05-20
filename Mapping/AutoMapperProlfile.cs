@@ -11,13 +11,17 @@ namespace HeartDiseaseAPI.Mapping
             CreateMap<Patient, PatientReadDtos>();
             CreateMap<PatientCreateDtos, Patient>();
         }
-        private int NormalizeSex(String Sex){
-            //input flexible exemple {"m","f","H","M","h","m"}
-
+        private int NormalizeSex(string Sex)
+        {
             Sex = Sex.Trim().ToUpper();
-            return Sex == "H" || Sex == "M" ? 1 : 0;
 
-
+            if (Sex == "H" || Sex == "M")
+                return 1;
+            else if (Sex == "F")
+                return 0;
+            else
+                throw new ArgumentException($"Invalid sex value: {Sex}. Expected 'M', 'F', or 'H'.");
         }
+
     }
 }

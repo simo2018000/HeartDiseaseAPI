@@ -1,10 +1,30 @@
 @HeartDiseaseAPI_HostAddress = https://localhost:7225
-GET http://localhost:5131 
+
 POST {{HeartDiseaseAPI_HostAddress}}/patients
 Content-Type: application/json
 
 {
-  //Patient
+  
+  "age": 45,
+  "sex": "M",
+  "height": 175,
+  "weight": 70,
+  "bloodPressureLow": 85,
+  "bloodPressureHigh": 120,
+  "cholesterol": 200,
+  "glucose": 90,
+  "isSmoker": false,
+  "isAlcoholic": false,
+  "isActive": true
 }
+###
+
+GET {{HeartDiseaseAPI_HostAddress}}/patients
+
+###
+
+
+@id=1
+GET {{HeartDiseaseAPI_HostAddress}}/patients/{{id}}
 
 ###
