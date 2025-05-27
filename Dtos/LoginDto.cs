@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HeartDiseaseAPI.Models;
 namespace HeartDiseaseAPI.Dtos
+
 
 {
     public class LoginDto

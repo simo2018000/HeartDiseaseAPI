@@ -4,6 +4,7 @@ namespace HeartDiseaseAPI.Models
 {
     public class Patient
     {
+        [bs]
         //IDENTIFICATION DATA
         public string LastName { get; set; } = String.Empty;
         public string FirstName { get; set; } = String.Empty;
