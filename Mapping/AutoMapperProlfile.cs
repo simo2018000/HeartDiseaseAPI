@@ -8,20 +8,10 @@ namespace HeartDiseaseAPI.Mapping
     {
         public AutoMapperProfile()
         {
-            CreateMap<Patient, PatientReadDtos>();
-            CreateMap<PatientCreateDtos, Patient>();
+            // For reading patient data (excluding password, etc.)
+            CreateMap<Patient, PatientReadDto>();
+            CreateMap<PatientCreateDto, Patient>(); // Updated from PatientCreateDtos
         }
-        private int NormalizeSex(string Sex)
-        {
-            Sex = Sex.Trim().ToUpper();
-
-            if (Sex == "H" || Sex == "M")
-                return 1;
-            else if (Sex == "F")
-                return 0;
-            else
-                throw new ArgumentException($"Invalid sex value: {Sex}. Expected 'M', 'F', or 'H'.");
-        }
-
+      
     }
 }

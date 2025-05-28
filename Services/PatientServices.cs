@@ -73,23 +73,39 @@ namespace HeartDiseaseAPI.Services
         }
 
 
-        public async Task<bool> UpdateAsync(string id, Patient updatedPatient) // Parameter changed to string
+        public async Task<bool> UpdateAsync(string id, PatientCreateDto dto) // <<<< CHECK THIS LINE CAREFULLY
         {
-            var patient = await _myMongoService.GetAsync(id);
-            if (patient == null)
+            var patientToUpdate = await _myMongoService.GetAsync(id);
+            if (patientToUpdate == null)
             {
                 return false; // Patient not found
             }
 
-            updatedPatient.Id = id;
+            // Map fields from DTO to the existing patient entity
+            patientToUpdate.LastName = dto.LastName;
+            patientToUpdate.FirstName = dto.FirstName;
+            patientToUpdate.Email = dto.Email;
+            patientToUpdate.Age = dto.Age;
+            patientToUpdate.Sex = dto.Sex;
+            patientToUpdate.Height = dto.Height;
+            patientToUpdate.Weight = dto.Weight;
+            patientToUpdate.BloodPressureLow = dto.BloodPressureLow;
+            patientToUpdate.BloodPressureHigh = dto.BloodPressureHigh;
+            patientToUpdate.Cholesterol = dto.Cholesterol;
+            patientToUpdate.Glucose = dto.Glucose;
+            patientToUpdate.IsSmoker = dto.IsSmoker;
+            patientToUpdate.IsAlcoholic = dto.IsAlcoholic;
+            patientToUpdate.IsActive = dto.IsActive;
 
-            if (!string.IsNullOrEmpty(updatedPatient.Password) && !updatedPatient.Password.StartsWith("$2a$")) // Basic check if it's not already hashed
+            if (!string.IsNullOrWhiteSpace(dto.Password))
             {
-                updatedPatient.Password = BCrypt.Net.BCrypt.HashPassword(updatedPatient.Password);
+                if (!dto.Password.StartsWith("$2a$") && !dto.Password.StartsWith("$2b$"))
+                {
+                    patientToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                }
             }
 
-
-            await _myMongoService.UpdateAsync(id, updatedPatient);
+            await _myMongoService.UpdateAsync(id, patientToUpdate); // This call is correct (Patient model)
             return true;
         }
 

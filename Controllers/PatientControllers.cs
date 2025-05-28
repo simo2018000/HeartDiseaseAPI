@@ -1,113 +1,148 @@
-﻿// This class should not be here if AuthController is in the same file and namespace.
-// It needs to be in its own scope or a different file if you intend two separate controller classes.
-// Assuming PatientController is a separate class:
-// [ApiController] // Add this if it's a separate controller class
-// [Route("api/[controller]")] // Add this if it's a separate controller class
+﻿using AutoMapper; // Added for IMapper
 using HeartDiseaseAPI.Dtos;
 using HeartDiseaseAPI.Models;
 using HeartDiseaseAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using HeartDiseaseAPI.Extentions; // Assuming this contains the ToPatient() extension method
+using System.Collections.Generic; // Added for List
+using System.Threading.Tasks; // Added for Task
 
+[ApiController]
+[Route("api/[controller]")] // Standard route for controllers
 public class PatientController : ControllerBase
 {
     private readonly PatientServices _patientServices;
-    private readonly PredictionService _predictionService; // Assuming this is the intended service
+    private readonly PredictionService _predictionService;
+    private readonly IMapper _mapper; // Added for AutoMapper
 
-    // Use one constructor that injects all necessary services
-    public PatientController(PatientServices patientServices, PredictionService predictionService)
+    public PatientController(PatientServices patientServices, PredictionService predictionService, IMapper mapper) // Added IMapper
     {
         _patientServices = patientServices;
-        _predictionService = predictionService; // Initialize it
+        _predictionService = predictionService;
+        _mapper = mapper; // Added
     }
 
     [HttpGet]
-    public async Task<List<Patient>> GetAllAsync() // Signature is good
+    public async Task<ActionResult<List<PatientReadDto>>> GetAllAsync() // Return List<PatientReadDto>
     {
-        // Correct way to call an async service method
-        return await _patientServices.GetAllAsync();
+        var patients = await _patientServices.GetAllAsync();
+        var patientDtos = _mapper.Map<List<PatientReadDto>>(patients); // Map to DTO
+        return Ok(patientDtos);
     }
 
-    // If Patient.Id is now string for MongoDB, change route and parameter type
-    [HttpGet("{id}")] // Remove :int constraint if ID is string
-    public async Task<ActionResult<Patient>> GetByIdAsync(string id) // Change id to string, rename to GetByIdAsync
+    [HttpGet("{id}")]
+    public async Task<ActionResult<PatientReadDto>> GetByIdAsync(string id) // Return PatientReadDto
     {
-        // Correct way to call, pass string id
         var patient = await _patientServices.GetByIdAsync(id);
-        return patient == null ? NotFound() : Ok(patient);
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<Patient>> CreateAsync(PatientCreateDto dto) // Make async Task, rename to CreateAsync
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var patientModel = dto.ToPatient(); // Assuming ToPatient() is not async
-                                            // Ensure ToPatient correctly maps LastName, FirstName, Email
-                                            // from PatientCreateDtos to Patient model.
-
-        // AddPatientAsync is async and returns Task<Patient>
-        var createdPatient = await _patientServices.AddPatientAsync(patientModel);
-
-        // If Patient.Id is string, this is fine
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = createdPatient.Id }, createdPatient);
-    }
-
-    // If Patient.Id is now string for MongoDB, change route and parameter type
-    [HttpPut("{id}")] // Remove :int constraint
-    public async Task<ActionResult> UpdateAsync(string id, PatientCreateDto dto) // Change id to string, make async Task, rename
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        // GetByIdAsync takes string id and is async
-        var existingPatient = await _patientServices.GetByIdAsync(id);
-        if (existingPatient == null)
+        if (patient == null)
         {
             return NotFound();
         }
+        var patientDto = _mapper.Map<PatientReadDto>(patient); // Map to DTO
+        return Ok(patientDto);
+    }
 
-        var updatedPatientModel = dto.ToPatient();
-        updatedPatientModel.Id = id; // Set the string Id
-
-        // UpdateAsync takes string id and is async
-        var success = await _patientServices.UpdateAsync(id, updatedPatientModel);
-        if (!success) // If update failed (e.g., another check inside UpdateAsync returned false)
+    [HttpPost]
+    // Changed to use PatientCreateDto. Register method in service will handle mapping and password.
+    public async Task<ActionResult<PatientReadDto>> CreateAsync([FromBody] PatientCreateDto dto)
+    {
+        if (!ModelState.IsValid)
         {
-            // This case might be rare if GetByIdAsync already confirmed existence.
-            // Typically UpdateAsync might throw an exception for concurrency issues,
-            // or simply perform the update.
-            return NotFound(); // Or some other error if appropriate
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            // The Register service method now takes PatientCreateDto, maps it to Patient,
+            // hashes the password, and saves it.
+            var registeredPatient = await _patientServices.Register(dto);
+            var patientReadDto = _mapper.Map<PatientReadDto>(registeredPatient);
+
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = patientReadDto.Id }, patientReadDto);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception ex
+            return BadRequest(ex.Message); // Or a more generic error message
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateAsync(string id, [FromBody] PatientCreateDto dto) // Changed to PatientCreateDto
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // The service's UpdateAsync now takes PatientCreateDto and handles finding the existing patient
+        // and mapping updated fields, including password if provided.
+        var success = await _patientServices.UpdateAsync(id, dto);
+        if (!success)
+        {
+            return NotFound(); // Or some other error if appropriate (e.g., concurrency issue)
         }
 
         return NoContent();
     }
 
-    // If Patient.Id is now string for MongoDB, change route and parameter type
-    [HttpDelete("{id}")] // Remove :int constraint
-    public async Task<ActionResult> DeleteAsync(string id) // Change id to string, make async Task, rename
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteAsync(string id)
     {
-        // DeleteAsync takes string id and is async, returns Task<bool>
         var success = await _patientServices.DeleteAsync(id);
-        if (!success) // If not successful (e.g., patient not found to delete)
+        if (!success)
         {
             return NotFound();
         }
-        return NoContent(); // Success
+        return NoContent();
     }
 
-    // Predict Endpoint
     [HttpPost("predict")]
-    public ActionResult<bool> Predict(PatientCreateDto dto)
+    // Input for prediction might be better as a specific DTO if PatientCreateDto has too much (e.g. password)
+    // For now, using PatientCreateDto and mapping to Patient model for the prediction service
+    public async Task<ActionResult<HeartDiseasePrediction>> PredictAsync([FromBody] PatientCreateDto dto)
     {
-        var patient = dto.ToPatient();
-        bool result = _predictionService.Predict(patient); // ✅ Not PredictAsync
-        return Ok(result);
-    }
+        if (!ModelState.IsValid)
+        {
+            // Return a more structured error or just BadRequest
+            return BadRequest(new { message = "Invalid input data for prediction.", errors = ModelState });
+        }
 
+        // Map DTO to Patient model for prediction service.
+        // The ToPatient extension now handles the basic mapping.
+        // The prediction service needs a Patient object.
+        var patientDataForPrediction = new Patient // Manually create for prediction to avoid sending password to prediction service
+        {
+            Age = dto.Age,
+            Sex = dto.Sex,
+            Height = dto.Height,
+            Weight = dto.Weight,
+            BloodPressureHigh = dto.BloodPressureHigh,
+            BloodPressureLow = dto.BloodPressureLow,
+            Cholesterol = dto.Cholesterol,
+            Glucose = dto.Glucose,
+            IsSmoker = dto.IsSmoker,
+            IsAlcoholic = dto.IsAlcoholic,
+            IsActive = dto.IsActive
+            // Note: Password and other PII are not included here for the prediction model
+        };
+
+        // Assuming _predictionService.Predict is synchronous for now based on its original implementation
+        // If it were async: bool predictionResult = await _predictionService.PredictAsync(patientDataForPrediction);
+        bool hasHeartDisease = _predictionService.Predict(patientDataForPrediction);
+
+        // Update the HasHeartDisease flag on the patient record if needed (optional, based on requirements)
+        // This might be better handled by a separate call if the prediction is just for informational purposes vs. updating the patient record.
+        // For now, we just return the prediction.
+
+        var predictionResult = new HeartDiseasePrediction
+        {
+            PredictedLabel = hasHeartDisease,
+            // Probability and Score are not available from the current boolean Predict method.
+            // The ONNX service would need to be modified to return these if required.
+            Probability = hasHeartDisease ? 1.0f : 0.0f, // Placeholder
+            Score = hasHeartDisease ? 1.0f : 0.0f // Placeholder
+        };
+
+        return Ok(predictionResult);
+    }
 }

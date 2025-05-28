@@ -3,7 +3,7 @@ using HeartDiseaseAPI.Dtos;
 
 namespace HeartDiseaseAPI.Extentions
 {
-    public static class PatientCreateDtosExtensions
+    public static class PatientCreateDtoExtensions
     {
         public static Patient ToPatient(this PatientCreateDto dto)
         {
