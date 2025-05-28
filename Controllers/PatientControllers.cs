@@ -57,7 +57,7 @@ public class PatientController : ControllerBase
             var registeredPatient = await _patientServices.Register(dto);
             var patientReadDto = _mapper.Map<PatientReadDto>(registeredPatient);
 
-            return CreatedAtRoute("GetPatientByIdnot ", new { id = patientReadDto.Id }, patientReadDto);
+            return CreatedAtRoute("GetPatientById ", new { id = patientReadDto.Id }, patientReadDto);
         }
         catch (Exception ex)
         {
