@@ -25,8 +25,8 @@ public class PatientController : ControllerBase
     public async Task<ActionResult<List<PatientReadDto>>> GetAllAsync() // Return List<PatientReadDto>
     {
         var patients = await _patientServices.GetAllAsync();
-        var patientDtos = _mapper.Map<List<PatientReadDto>>(patients); // Map to DTO
-        return Ok(patientDtos);
+        var patientDto = _mapper.Map<List<PatientReadDto>>(patients); // Map to DTO
+        return Ok(patientDto);
     }
 
     [HttpGet("{id}")]
