@@ -15,11 +15,25 @@ namespace HeartDiseaseAPI.Services
         {
             var modelPath = configuration.GetValue<string>("ModelSettings:ModelPath");
             _session = new InferenceSession(modelPath);
+
+            Console.WriteLine("== MODEL INPUTS ==");
+            foreach (var input in _session.InputMetadata)
+            {
+                Console.WriteLine($"Input Name: {input.Key}, Type: {input.Value.ElementType}, Dimensions: {string.Join(",", input.Value.Dimensions)}");
+            }
+
+            Console.WriteLine("== MODEL OUTPUTS ==");
+            foreach (var output in _session.OutputMetadata)
+            {
+                Console.WriteLine($"Output Name: {output.Key}, Type: {output.Value.ElementType}, Dimensions: {string.Join(",", output.Value.Dimensions)}");
+            }
         }
 
         public PredictionResult Predict(Patient patient)
         {
-            var inputData = new DenseTensor<float>(new[]
+            // Prepare input tensor
+            var inputData = new DenseTensor<float>(new[] { 1, 11 });
+            var inputValues = new float[]
             {
                 patient.Age,
                 NormalizeSex(patient.Sex),
@@ -32,43 +46,38 @@ namespace HeartDiseaseAPI.Services
                 patient.IsSmoker ? 1f : 0f,
                 patient.IsAlcoholic ? 1f : 0f,
                 patient.IsActive ? 1f : 0f
-            }, new[] { 1, 11 });
+            };
+
+            for (int i = 0; i < inputValues.Length; i++)
+            {
+                inputData[0, i] = inputValues[i];
+            }
 
             var inputs = new List<NamedOnnxValue>
             {
-                NamedOnnxValue.CreateFromTensor("float_input", inputData)
+                NamedOnnxValue.CreateFromTensor("input", inputData)
             };
 
             using var results = _session.Run(inputs);
-            var output = results.First().Value as DenseTensor<float>;
-            var probabilities = output?.ToArray();
-
-            if (probabilities == null || probabilities.Length < 2)
-                throw new InvalidOperationException("Model did not return valid prediction probabilities.");
-
+            var predictionLabel = results.FirstOrDefault(r => r.Name == "label")?.AsEnumerable<long>().First();
+            var predictionProbs = results.FirstOrDefault(r => r.Name == "probabilities")?.AsEnumerable<float>().ToArray();
 
             return new PredictionResult
             {
-                HasHeartDisease = probabilities[1] > 0.5f,
-                Confidence = probabilities[1]
+                HasHeartDisease = predictionProbs[1] > 0.5f,
+                Confidence = predictionProbs[1]
             };
         }
 
         private float NormalizeSex(string sex)
         {
             sex = sex.Trim().ToUpper();
-            switch (sex)
+            return sex switch
             {
-                case "M":
-                case "H":
-                    return 1f;
-                case "F":
-                    return 0f;
-                default:
-                    throw new ArgumentException("Invalid sex value.");
-            }
+                "M" or "H" => 1f,
+                "F" => 0f,
+                _ => throw new ArgumentException("Invalid sex value.")
+            };
         }
-
-
     }
 }
