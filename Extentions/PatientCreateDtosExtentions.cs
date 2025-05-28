@@ -5,10 +5,14 @@ namespace HeartDiseaseAPI.Extentions
 {
     public static class PatientCreateDtosExtensions
     {
-        public static Patient ToPatient(this PatientCreateDtos dto)
+        public static Patient ToPatient(this PatientCreateDto dto)
         {
             return new Patient
+
             {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
                 Age = dto.Age,
                 Sex = dto.Sex,
                 Height = dto.Height,

@@ -77,12 +77,4 @@ app.MapDelete("/patients/{id}", async (string id, PatientServices service) => //
     return result ? Results.NoContent() : Results.NotFound();
 });
 
-// The HttpClientHandler for DangerousAcceptAnyServerCertificateValidator was here
-// It's generally not recommended for production. Remove or conditionally include for development.
-// var handler = new HttpClientHandler
-// {
-// ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-// };
-// var client = new HttpClient(handler);
-
 app.Run();

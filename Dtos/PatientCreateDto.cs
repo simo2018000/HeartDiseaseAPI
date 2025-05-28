@@ -2,7 +2,7 @@
 
 namespace HeartDiseaseAPI.Dtos
 {
-    public class PatientCreateDtos
+    public class PatientCreateDto
     {
 
         //PATIENT DATA

@@ -38,7 +38,7 @@ public class PatientController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Patient>> CreateAsync(PatientCreateDtos dto) // Make async Task, rename to CreateAsync
+    public async Task<ActionResult<Patient>> CreateAsync(PatientCreateDto dto) // Make async Task, rename to CreateAsync
     {
         if (!ModelState.IsValid)
         {
@@ -58,7 +58,7 @@ public class PatientController : ControllerBase
 
     // If Patient.Id is now string for MongoDB, change route and parameter type
     [HttpPut("{id}")] // Remove :int constraint
-    public async Task<ActionResult> UpdateAsync(string id, PatientCreateDtos dto) // Change id to string, make async Task, rename
+    public async Task<ActionResult> UpdateAsync(string id, PatientCreateDto dto) // Change id to string, make async Task, rename
     {
         if (!ModelState.IsValid)
         {
@@ -103,23 +103,11 @@ public class PatientController : ControllerBase
 
     // Predict Endpoint
     [HttpPost("predict")]
-    public async Task<ActionResult<bool>> PredictAsync(PatientCreateDtos dto) // Consider making async if service is async
+    public ActionResult<bool> Predict(PatientCreateDto dto)
     {
-        // 1. Map DTO to the input model your PredictionService expects.
-        // Using PatientCreateDtos directly might send too much/irrelevant data.
-        // We planned a HeartDiseasePrediction model specifically for ONNX input.
-        // For now, if your PredictionService.Predict takes the full Patient model:
-        var patientDataForPrediction = dto.ToPatient();
-
-        // This depends on your PredictionService.Predict method signature.
-        // If it's synchronous:
-        // bool result = _predictionService.Predict(patientDataForPrediction);
-        // If it becomes asynchronous (recommended if it involves I/O or is potentially long):
-        bool result = await _predictionService.PredictAsync(patientDataForPrediction);
-        // ^ Assuming an async version
-
-        // Returning a simple bool might be okay for a start.
-        // We previously discussed a PatientResultDto for more detailed output (e.g., probability).
+        var patient = dto.ToPatient();
+        bool result = _predictionService.Predict(patient); // ✅ Not PredictAsync
         return Ok(result);
     }
+
 }

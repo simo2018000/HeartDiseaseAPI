@@ -21,7 +21,7 @@ namespace HeartDiseaseAPI.Services
             _myMongoService = myMongoService;
         }
 
-        public async Task<Patient> Register(PatientCreateDtos dto) //
+        public async Task<Patient> Register(PatientCreateDto dto) //
         {
             var existingPatient = await _myMongoService.GetByEmailAsync(dto.Email);
             if (existingPatient != null)
