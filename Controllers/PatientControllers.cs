@@ -29,7 +29,7 @@ public class PatientController : ControllerBase
         return Ok(patientDto);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetPatientById")]
     public async Task<ActionResult<PatientReadDto>> GetByIdAsync(string id) // Return PatientReadDto
     {
         var patient = await _patientServices.GetByIdAsync(id);
@@ -57,7 +57,7 @@ public class PatientController : ControllerBase
             var registeredPatient = await _patientServices.Register(dto);
             var patientReadDto = _mapper.Map<PatientReadDto>(registeredPatient);
 
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = patientReadDto.Id }, patientReadDto);
+            return CreatedAtRoute("GetPatientByIdnot ", new { id = patientReadDto.Id }, patientReadDto);
         }
         catch (Exception ex)
         {
@@ -96,21 +96,16 @@ public class PatientController : ControllerBase
         return NoContent();
     }
 
+    // In PatientController.cs - PredictAsync method
     [HttpPost("predict")]
-    // Input for prediction might be better as a specific DTO if PatientCreateDto has too much (e.g. password)
-    // For now, using PatientCreateDto and mapping to Patient model for the prediction service
-    public async Task<ActionResult<HeartDiseasePrediction>> PredictAsync([FromBody] PatientCreateDto dto)
+    public ActionResult<PredictionResult> Predict([FromBody] PatientCreateDto dto) // Made synchronous
     {
         if (!ModelState.IsValid)
         {
-            // Return a more structured error or just BadRequest
             return BadRequest(new { message = "Invalid input data for prediction.", errors = ModelState });
         }
 
-        // Map DTO to Patient model for prediction service.
-        // The ToPatient extension now handles the basic mapping.
-        // The prediction service needs a Patient object.
-        var patientDataForPrediction = new Patient // Manually create for prediction to avoid sending password to prediction service
+        var patientDataForPrediction = new Patient
         {
             Age = dto.Age,
             Sex = dto.Sex,
@@ -123,26 +118,11 @@ public class PatientController : ControllerBase
             IsSmoker = dto.IsSmoker,
             IsAlcoholic = dto.IsAlcoholic,
             IsActive = dto.IsActive
-            // Note: Password and other PII are not included here for the prediction model
         };
 
-        // Assuming _predictionService.Predict is synchronous for now based on its original implementation
-        // If it were async: bool predictionResult = await _predictionService.PredictAsync(patientDataForPrediction);
-        bool hasHeartDisease = _predictionService.Predict(patientDataForPrediction);
+        // Directly get the PredictionResult object from the service
+        PredictionResult resultFromService = _predictionService.Predict(patientDataForPrediction);
 
-        // Update the HasHeartDisease flag on the patient record if needed (optional, based on requirements)
-        // This might be better handled by a separate call if the prediction is just for informational purposes vs. updating the patient record.
-        // For now, we just return the prediction.
-
-        var predictionResult = new HeartDiseasePrediction
-        {
-            PredictedLabel = hasHeartDisease,
-            // Probability and Score are not available from the current boolean Predict method.
-            // The ONNX service would need to be modified to return these if required.
-            Probability = hasHeartDisease ? 1.0f : 0.0f, // Placeholder
-            Score = hasHeartDisease ? 1.0f : 0.0f // Placeholder
-        };
-
-        return Ok(predictionResult);
+        return Ok(resultFromService);
     }
 }

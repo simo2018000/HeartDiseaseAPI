@@ -2,6 +2,7 @@
 {
     public class PatientReadDto // Renamed from PatientReadDtos
     {
+        public PatientReadDto() { }
         public string? Id { get; set; } // Changed from int ID, made nullable string to match Patient model
         public string LastName { get; set; } = String.Empty;
         public string FirstName { get; set; } = String.Empty;

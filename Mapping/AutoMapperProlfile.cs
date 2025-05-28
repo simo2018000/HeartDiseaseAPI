@@ -8,10 +8,8 @@ namespace HeartDiseaseAPI.Mapping
     {
         public AutoMapperProfile()
         {
-            // For reading patient data (excluding password, etc.)
-            CreateMap<Patient, PatientReadDto>();
-            CreateMap<PatientCreateDto, Patient>(); // Updated from PatientCreateDtos
+            CreateMap<Patient, PatientReadDto>(); // This should be sufficient by convention
+            CreateMap<PatientCreateDto, Patient>();
         }
-      
     }
 }
