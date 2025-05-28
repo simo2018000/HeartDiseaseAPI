@@ -65,7 +65,7 @@ namespace HeartDiseaseAPI.Services
             return new PredictionResult
             {
                 HasHeartDisease = predictionProbs[1] > 0.5f,
-                Confidence = predictionProbs[1]
+                Confidence = predictionProbs[1]*100
             };
         }
 
