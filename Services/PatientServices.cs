@@ -29,12 +29,7 @@ namespace HeartDiseaseAPI.Services
                 throw new Exception("Email deja existant.");
             }
 
-            var patient = dto.ToPatient(); // Uses your existing extension method
-                                           // Ensure ToPatient maps LastName, FirstName, Email correctly
-                                           // If your ToPatient() doesn't map LastName, FirstName, Email, do it here:
-                                           // patient.LastName = dto.LastName;
-                                           // patient.FirstName = dto.FirstName;
-                                           // patient.Email = dto.Email;
+            var patient = dto.ToPatient();
 
             patient.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             // MongoDB will generate the patient.Id if it's null (when Patient.Id is string? and [BsonId][BsonRepresentation(BsonType.ObjectId)])
@@ -52,8 +47,8 @@ namespace HeartDiseaseAPI.Services
 
                 throw new Exception("Email ou mot de passe incorrect.");
             }
-                
-            
+
+
             return patient;
         }
 
@@ -86,11 +81,11 @@ namespace HeartDiseaseAPI.Services
                 return false; // Patient not found
             }
 
-            updatedPatient.Id = id; 
+            updatedPatient.Id = id;
 
-             if (!string.IsNullOrEmpty(updatedPatient.Password) && !updatedPatient.Password.StartsWith("$2a$")) // Basic check if it's not already hashed
-             {
-             updatedPatient.Password = BCrypt.Net.BCrypt.HashPassword(updatedPatient.Password);
+            if (!string.IsNullOrEmpty(updatedPatient.Password) && !updatedPatient.Password.StartsWith("$2a$")) // Basic check if it's not already hashed
+            {
+                updatedPatient.Password = BCrypt.Net.BCrypt.HashPassword(updatedPatient.Password);
             }
 
 
@@ -102,11 +97,6 @@ namespace HeartDiseaseAPI.Services
         {
             return await _myMongoService.RemoveAsync(id);
         }
-
-        // The FindIndexByID method is no longer needed as we're not managing an in-memory list.
-        // private int FindIndexByID(int id) //
-        // {
-        // return _patients.FindIndex(p => p.ID == id);
-        // }
     }
 }
+    
