@@ -67,7 +67,7 @@ public class PatientController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateAsync(string id, [FromBody] PatientCreateDto dto) // Changed to PatientCreateDto
+    public async Task<ActionResult> UpdateAsync(string id, [FromBody] UpdatedPatientDto dto) // Changed to PatientCreateDto
     {
         if (!ModelState.IsValid)
         {
@@ -96,9 +96,10 @@ public class PatientController : ControllerBase
         return NoContent();
     }
 
-    // In PatientController.cs - PredictAsync method
+    // In Controllers/PatientController.cs
+    // ...
     [HttpPost("predict")]
-    public ActionResult<PredictionResult> Predict([FromBody] PatientCreateDto dto) // Made synchronous
+    public ActionResult<PredictionResult> Predict([FromBody] PatientInputDto dto) // Changed DTO here
     {
         if (!ModelState.IsValid)
         {
@@ -120,9 +121,9 @@ public class PatientController : ControllerBase
             IsActive = dto.IsActive
         };
 
-        // Directly get the PredictionResult object from the service
         PredictionResult resultFromService = _predictionService.Predict(patientDataForPrediction);
 
         return Ok(resultFromService);
     }
+    // ...
 }

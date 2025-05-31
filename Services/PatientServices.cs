@@ -73,7 +73,9 @@ namespace HeartDiseaseAPI.Services
         }
 
 
-        public async Task<bool> UpdateAsync(string id, PatientCreateDto dto) // <<<< CHECK THIS LINE CAREFULLY
+        // In Services/PatientServices.cs
+        // ...
+        public async Task<bool> UpdateAsync(string id, UpdatedPatientDto dto) // <<-- CHANGE HERE to UpdatedPatientDto
         {
             var patientToUpdate = await _myMongoService.GetAsync(id);
             if (patientToUpdate == null)
@@ -82,9 +84,6 @@ namespace HeartDiseaseAPI.Services
             }
 
             // Map fields from DTO to the existing patient entity
-            patientToUpdate.LastName = dto.LastName;
-            patientToUpdate.FirstName = dto.FirstName;
-            patientToUpdate.Email = dto.Email;
             patientToUpdate.Age = dto.Age;
             patientToUpdate.Sex = dto.Sex;
             patientToUpdate.Height = dto.Height;
@@ -97,17 +96,14 @@ namespace HeartDiseaseAPI.Services
             patientToUpdate.IsAlcoholic = dto.IsAlcoholic;
             patientToUpdate.IsActive = dto.IsActive;
 
-            if (!string.IsNullOrWhiteSpace(dto.Password))
-            {
-                if (!dto.Password.StartsWith("$2a$") && !dto.Password.StartsWith("$2b$"))
-                {
-                    patientToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-                }
-            }
+            // Removed personal data updates like LastName, FirstName, Email, Password from here
+            // as UpdatedPatientDto only contains health data.
+            // If you need to update personal data, you'd need a separate DTO/method.
 
-            await _myMongoService.UpdateAsync(id, patientToUpdate); // This call is correct (Patient model)
+            await _myMongoService.UpdateAsync(id, patientToUpdate);
             return true;
         }
+        // ...
 
         public async Task<bool> DeleteAsync(string id) // Parameter changed to string
         {
