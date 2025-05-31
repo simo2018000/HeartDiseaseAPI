@@ -73,7 +73,7 @@ namespace HeartDiseaseAPI.Controllers
                 // and that you've handled the "No route matches" error for CreatedAtAction/Route.
                 // If that Get route is not named, this specific CreatedAtRoute will fail.
                 // For simplicity, you could just return Ok(patientReadDto);
-                return CreatedAtRoute("GetPatientById", new { controller = "Patient", id = patientReadDto.Id }, patientReadDto);
+                return CreatedAtRoute("GetPatientById", new { id = patientReadDto.Id }, patientReadDto);
             }
             catch (System.Exception ex)
             {
