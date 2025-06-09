@@ -3,6 +3,7 @@ using HeartDiseaseAPI.Mapping;
 using HeartDiseaseAPI.Models; // For Patient, MongoDbSettings, ModelSettings
 using HeartDiseaseAPI.Services;
 using Microsoft.Extensions.Options; // For IOptions
+using Microsoft.AspNetCore.StaticFiles; // Add this using directive for static files
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,16 @@ builder.Services.AddSingleton<PatientServices>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddSingleton<PredictionService>(); // Ensure this is the correct, consolidated service
 
+// Add CORS policy setup
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendOrigin", // You can name your policy
+        builder => builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000") // <--- IMPORTANT: Replace with your React app's URL
+                         .AllowAnyHeader()
+                         .AllowAnyMethod()
+                         .AllowCredentials()); // If you use cookies or credentials
+});
+
 // Add controllers
 builder.Services.AddControllers(); // Required for controllers to work
 
@@ -36,22 +47,30 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Middleware for enabling request buffering (was already here)
+// Middleware for enabling request buffering
 app.Use(async (context, next) =>
 {
     context.Request.EnableBuffering();
     await next();
 });
-// The second Use block for EnableBuffering was removed as it's redundant.
+
+// Use CORS policy - This must be called before UseHttpsRedirection and UseAuthorization
+app.UseCors("AllowFrontendOrigin");
+
+// --- Static file serving middleware (must be before MapControllers) ---
+app.UseDefaultFiles(); // Serves index.html for the root path
+app.UseStaticFiles();  // Serves other static files (JS, CSS, images, etc.)
 
 app.UseHttpsRedirection(); // Added for HTTPS
+// app.UseAuthorization(); // If enabled
 
-// app.UseAuthorization(); // Add this if you implement authentication/authorization
+app.MapControllers(); // Maps your API endpoints (e.g., /api/patient)
 
-app.MapControllers(); // This maps attribute-routed controllers (like PatientController)
-
+// This line will only be hit if UseDefaultFiles/UseStaticFiles/MapControllers don't find a match
 app.MapGet("/", () => "Heart Disease API is running!");
 
-
+// --- ADD THIS LINE FOR SPA CLIENT-SIDE ROUTING ---
+// For any unhandled routes, fallback to index.html (allowing React Router to take over)
+app.MapFallbackToFile("index.html");
 
 app.Run();

@@ -7,10 +7,10 @@ Content-Type: application/json
 {
     "lastName": "Doe",
     "firstName": "John",
-    "email": "medbatar.23@gmail.ccm",
+    "email": "Sara@gmail.com",
     "password": "Password123!",
     "age": 45,
-    "sex": "M",
+    "sex": "12",
     "height": 175,
     "weight": 80,
     "bloodPressureLow": 80,
@@ -23,4 +23,11 @@ Content-Type: application/json
 }
 
 
+###
+
+@id=68367de608564ba979c99c7e
+DELETE {{HeartDiseaseAPI_HostAddress}}/api/patient/{{id}}
+{
+
+}
 ###
