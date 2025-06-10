@@ -25,7 +25,7 @@ builder.Services.AddSingleton<PredictionService>(); // Ensure this is the correc
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendOrigin", // You can name your policy
-        builder => builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000") // <--- IMPORTANT: Replace with your React app's URL
+        builder => builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000", "https://localhost:7225") // <--- IMPORTANT: Replace with your React app's URL
                          .AllowAnyHeader()
                          .AllowAnyMethod()
                          .AllowCredentials()); // If you use cookies or credentials

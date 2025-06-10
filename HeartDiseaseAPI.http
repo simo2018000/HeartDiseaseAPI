@@ -25,9 +25,41 @@ Content-Type: application/json
 
 ###
 
-@id=68367de608564ba979c99c7e
+@id=683684dcda33b3ea778a1461
 DELETE {{HeartDiseaseAPI_HostAddress}}/api/patient/{{id}}
 {
 
 }
+###
+
+GET {{HeartDiseaseAPI_HostAddress}}/api/patient/{{id}}
+
+###
+
+POST {{HeartDiseaseAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  
+}
+
+###
+
+POST {{HeartDiseaseAPI_HostAddress}}/api/patient/predict
+Content-Type: application/json
+
+{
+  "age": 30,
+  "sex": "M",
+  "height": 170,
+  "weight": 70,
+  "bloodPressureLow": 120,
+  "bloodPressureHigh": 300,
+  "cholesterol": 200,
+  "glucose": 85,
+  "isSmoker": false,
+  "isAlcoholic": false,
+  "isActive": true
+}
+
 ###
