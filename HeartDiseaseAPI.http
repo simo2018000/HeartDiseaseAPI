@@ -39,8 +39,11 @@ GET {{HeartDiseaseAPI_HostAddress}}/api/patient/{{id}}
 POST {{HeartDiseaseAPI_HostAddress}}/api/auth/login
 Content-Type: application/json
 
-{
-  
+
+ {
+ 
+  "email": "john.doe@example.com",
+  "password": "SecurePassword123!"
 }
 
 ###
