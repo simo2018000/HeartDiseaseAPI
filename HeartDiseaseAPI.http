@@ -66,3 +66,7 @@ Content-Type: application/json
 }
 
 ###
+
+GET {{HeartDiseaseAPI_HostAddress}}/api/patient
+
+###
